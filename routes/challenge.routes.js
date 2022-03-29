@@ -3,6 +3,7 @@ const Challenge = require("../models/Challenge.model");
 const Game = require("../models/Game.model");
 const League = require("../models/League.model");
 const User = require("../models/User.model");
+const Contender = require("../models/Contender.model");
 const mongoose = require("mongoose");
 
 /* GET home page */
@@ -19,7 +20,6 @@ router.get("/list", async (req, res, next) => {
       {league}
     ).populate('league')
     .populate('game')
-    .populate('contenders')
 
     const data = {
       challenges,
@@ -61,13 +61,21 @@ router.get("/create", async (req, res, next) => {
 });
 
 router.post("/create", async (req, res, next) => {
-  console.log('req.body :', req.body)
-  const {league, game, users, stake} = req.body
-  const challengeToCreate = {league, game, contenders: users, stake}
-  console.log('challengeToCreate: ', challengeToCreate)
+  const {league, game, contenders, stake} = req.body
+  const challengeToCreate = {league, game, stake}
   const challengeCreated = await Challenge.create(challengeToCreate)
   console.log('challengeCreated: ', challengeCreated)
-  res.send("create post")
+  const challengeID = challengeCreated._id
+  console.log('contenders:', contenders)
+  for(let i=0 ; i<contenders.length ; i++){
+    const contenderToCreate = {
+      contender: contenders[i],
+      challenge: challengeID,
+    };
+  const contenderCreated = await Contender.create(contenderToCreate)
+  console.log('-------------------contenderCreated: ', contenderCreated)
+  };
+  res.send("create post");
 });
 
 router.post("/edit/:challengeID", async (req, res, next) => {
